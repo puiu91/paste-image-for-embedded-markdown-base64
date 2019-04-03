@@ -1,0 +1,1 @@
+# paste-image-for-embedded-markdown-base64
