@@ -2,6 +2,10 @@
 
 A small utility that will generate a base64 encoded image string with a markdown reference.
 
+## Use
+
+Copy and paste an image from memory onto the html page.
+
 ## Example
 
 **1.** Embed the base64 image to the document (ideally, at the end of the document)
