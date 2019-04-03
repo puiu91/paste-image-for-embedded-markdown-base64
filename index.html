@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Paste to base64</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.5.3/css/foundation.min.css"
+    />
+    <style>
+      .container {
+        margin: 0 auto;
+        width: 960px;
+      }
+      textarea {
+        display: block;
+        width: 100%;
+        height: 618px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid-container">
+      <h1>Paste to base64</h1>
+      <div class="grid-x grid-margin-x">
+        <div class="cell small-6">
+          <h3>Raw Base64</h3>
+          <label>
+            <b>base64</b>
+            <textarea name="base64TextArea"></textarea>
+          </label>
+        </div>
+        <div class="cell small-6">
+          <h3>Base64 for Markdown</h3>
+
+          <label>
+            <b>Example in Markdown</b>
+
+            <div class="callout">
+              <ol>
+                <li>
+                  Embed the base64 image to the document (ideally, at the end of
+                  the document)
+                  <div class="callout">
+                    <code>[abc]:data:image/png;base64,iVBORw0KGgoA...</code>
+                  </div>
+                </li>
+                <li>
+                  Refer to embedded base64's named reference of <code>abc</code>
+                  <div class="callout">
+                    <code>![abc] lorem ipsum dolor</code>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </label>
+
+          <label>
+            <b>Markdown Reference Name</b>
+            <input type="text" name="markdownReferenceName" />
+          </label>
+
+          <label>
+            <b>Embedded Markdown Base64 Reference</b>
+            <button
+              type="button"
+              class="button"
+              name="copyButton"
+              onclick="handleCopyButton()"
+            >
+              Copy
+            </button>
+            <textarea name="base64TextAreaForMarkdown"></textarea>
+          </label>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script type="text/javascript">
+    function handleCopyButton(event) {
+      const base64TextArea = document.getElementsByName(
+        "base64TextAreaForMarkdown"
+      )[0];
+      base64TextArea.select();
+      document.execCommand("copy");
+    }
+
+    function onPasteHandler({ clipboardData, originalEvent }) {
+      const base64TextArea = document.getElementsByName("base64TextArea")[0];
+      const base64TextAreaForMarkdown = document.getElementsByName(
+        "base64TextAreaForMarkdown"
+      )[0];
+      const markdownReferenceName = document.getElementsByName(
+        "markdownReferenceName"
+      )[0];
+
+      if (!markdownReferenceName.value) {
+        alert("Must provide a reference name first");
+        markdownReferenceName.focus();
+        return;
+      }
+
+      const clipboard = clipboardData || originalEvent.clipboardData;
+      const items = clipboard.items;
+
+      // update the base64 embedded markdown reference with new markdown reference name
+      markdownReferenceName.onchange = function(event) {
+        const { value } = event.currentTarget;
+        const currentBase64 = base64TextArea.value;
+        base64TextAreaForMarkdown.innerText = `[${value}]:${currentBase64}`;
+      };
+
+      const item = items[0];
+      if (item.kind === "file") {
+        const blob = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = ({ target }) => {
+          base64TextArea.innerText = target.result;
+          const markdownReferenceNameValue = markdownReferenceName.value;
+          base64TextAreaForMarkdown.innerText = `[${markdownReferenceNameValue}]:${
+            target.result
+          }`;
+        };
+
+        reader.readAsDataURL(blob);
+      }
+    }
+
+    document.onpaste = onPasteHandler;
+  </script>
+</html>
